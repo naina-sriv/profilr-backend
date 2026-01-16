@@ -1,0 +1,23 @@
+#CREATE A VIRTUAL ENVIRONMENT:
+
+python -m venv myenv
+
+#ACTIVATE THE VIRTUAL ENVIRONMENT
+
+myenv\Scripts\activate
+
+#DOWNLOAD THE requirements
+
+pip install -r requirements.txt
+
+#START THE FASTAPI SERVER
+uvicorn backend.app.main:app --reload
+
+#START THE STREAMLIT FRONTEND on another terminal
+
+myenv\Scripts\activate
+cd frontend
+streamlit run stream_lit.py
+
+
+
