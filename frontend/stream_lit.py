@@ -42,6 +42,17 @@ if uploaded_file is not None:
 
                     st.subheader("📈 Report")
                     st.json(data["report"])
+                    st.subheader("📥 Export Report")
+                    export_response = requests.get("http://localhost:8000/export/")
+                    if export_response.status_code == 200:
+                        st.download_button(
+                            label="Download JSON Report",
+                            data=export_response.content,
+                            file_name="report.json",
+                            mime="application/json"
+                            )
+                    else:
+                        st.error("Could not fetch export.")
 
                 else:
                     st.error("Server returned an error")

@@ -1,153 +1,106 @@
-# 📊 CSV Profiler
+# CSV Profiler — Data Profiling Pipeline
 
-A **FastAPI + Streamlit** web application that accepts any CSV file and generates a detailed statistical and data-quality analysis, including summaries, missing values, outliers, correlations, and memory usage.
-
----
-
-## ✨ Features
-
-* Upload **any CSV file**
-* Automatic **encoding detection**
-* Dataset overview (rows, columns, memory usage)
-* Missing value analysis
-* Numeric statistics (mean, median, min, max, std)
-* Outlier detection using IQR
-* Distribution metrics (skewness, kurtosis)
-* Duplicate row detection
-* Constant and empty column detection
-* Correlation matrix for numeric columns
-* Clean **FastAPI backend** + interactive **Streamlit frontend**
+A FastAPI + Streamlit data pipeline that ingests CSV files, extracts
+and transforms data quality metrics, and delivers structured JSON reports.
 
 ---
 
-## 🏗️ Tech Stack
+## Pipeline Architecture
 
-* **Backend:** FastAPI, Uvicorn
-* **Frontend:** Streamlit
-* **Data Processing:** Pandas, NumPy
-* **Encoding Detection:** Chardet
+| Stage     | What happens                                      |
+|-----------|---------------------------------------------------|
+| Ingest    | User uploads CSV via Streamlit                    |
+| Extract   | FastAPI reads file, chardet detects encoding      |
+| Transform | Pandas computes stats, outliers, correlations     |
+| Export    | Structured JSON report returned to frontend       |
+| Deliver   | Downloadable report saved to /reports/            |
+
+Full architecture documented in `docs/architecture.md`
 
 ---
 
-## 📁 Project Structure
+## Features
 
+- Upload any CSV file
+- Automatic encoding detection
+- Dataset overview (rows, columns, memory usage)
+- Missing value analysis
+- Numeric statistics (mean, median, min, max, std)
+- Outlier detection using IQR
+- Distribution metrics (skewness, kurtosis)
+- Duplicate row detection
+- Constant and empty column detection
+- Correlation matrix for numeric columns
+- Downloadable JSON report via /export/
+
+---
+
+## Tech Stack
+
+- Backend: FastAPI, Uvicorn
+- Frontend: Streamlit
+- Data Processing: Pandas, NumPy
+- Encoding Detection: Chardet
+
+---
+
+## Project Structure
 ```
 project-root/
-│
 ├── backend/
 │   └── app/
-│       ├── main.py
-│       ├── utils.py
-│       └── config.py
-│
+│       ├── main.py       # pipeline entrypoint, API routes
+│       ├── utils.py      # extraction and transformation logic
+│       └── config.py     # CORS setup
 ├── frontend/
-│   └── stream_lit.py
-│
+│   └── stream_lit.py     # Streamlit UI
+├── docs/
+│   └── architecture.md   # pipeline architecture documentation
+├── reports/              # delivered report outputs
 ├── requirements.txt
 └── README.md
 ```
 
 ---
 
-## ⚙️ Setup Instructions
-
-### 1️⃣ Create a virtual environment
-
+## Setup
 ```bash
 python -m venv myenv
-```
-
----
-
-### 2️⃣ Activate the virtual environment (Windows)
-
-```bash
 myenv\Scripts\activate
-```
-
----
-
-### 3️⃣ Install dependencies
-
-```bash
 pip install -r requirements.txt
 ```
 
 ---
 
-## ▶️ Running the Application
+## Running
 
-### 4️⃣ Start the FastAPI backend
-
-Run this from the **project root directory**:
-
+Start backend:
 ```bash
 uvicorn backend.app.main:app --reload
 ```
 
-The backend will be available at:
-
-```
-http://127.0.0.1:8000
-```
-
----
-
-### 5️⃣ Start the Streamlit frontend (new terminal)
-
+Start frontend (new terminal):
 ```bash
-myenv\Scripts\activate
 cd frontend
 python -m streamlit run stream_lit.py
 ```
 
-The frontend will open automatically at:
+---
 
-```
-http://localhost:8501
-```
+## API Endpoints
+
+| Method | Endpoint       | Description                        |
+|--------|----------------|------------------------------------|
+| GET    | /              | Health check                       |
+| POST   | /upload-csv/   | Upload CSV, returns JSON report    |
+| GET    | /export/       | Download last report as JSON file  |
 
 ---
 
-## 🚀 How It Works
+## Future Improvements
 
-1. User uploads a CSV file via Streamlit
-2. Streamlit sends the file to the FastAPI backend
-3. FastAPI parses and analyzes the CSV
-4. A structured JSON report is returned
-5. Streamlit renders the analysis in the UI
-
----
-
-## 🧪 Example API Endpoint
-
-**POST** `/upload-csv/`
-
-* **Input:** CSV file
-* **Output:** JSON analysis report
-
----
-
-## 🔒 CORS Configuration
-
-CORS is enabled to allow frontend communication:
-
-```python
-allow_origins=["*"]  # restrict in production
----
-
-## 🛠️ Future Improvements
-
-* Column-wise visualizations (charts)
-* Downloadable analysis reports
-* Session-based report storage
-* Authentication and file size limits
-* Dockerized deployment
-
----
-
-## 📄 License
-
-This project is open-source and available for educational and personal use.
-
+- Column-wise visualizations
+- Session-based report storage
+- Authentication and file size limits
+- Dockerized deployment
 
