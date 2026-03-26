@@ -43,7 +43,7 @@ if uploaded_file is not None:
                     st.subheader("📈 Report")
                     st.json(data["report"])
                     st.subheader("📥 Export Report")
-                    export_response = requests.get(f"{API_URL}/export/")
+                    export_response = requests.get(f"{API_URL}/export")
                     if export_response.status_code == 200:
                         st.download_button(
                             label="Download JSON Report",
