@@ -31,7 +31,7 @@ if uploaded_file is not None:
                     "file": (uploaded_file.name, uploaded_file.getvalue(), "text/csv")
                 }
 
-                response = requests.post(API_URL, files=files)
+                response = requests.post(f"{API_URL}/upload-csv", files=files)
 
                 if response.status_code == 200:
                     data = response.json()
