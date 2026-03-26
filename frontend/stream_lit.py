@@ -1,25 +1,15 @@
 import streamlit as st
 import requests
 import pandas as pd
+import json
 
+API_URL = "https://profilr-backend-production.up.railway.app"
 
-API_URL = "https://profilr-backend-production.up.railway.app" 
-
-st.set_page_config(
-    page_title="CSV Profiler",
-    page_icon="📊",
-    layout="centered"
-)
-
+st.set_page_config(page_title="CSV Profiler", page_icon="📊", layout="centered")
 st.title("CSV Profiler")
 st.write("Upload a CSV file and get instant profiling insights.")
 
-
-uploaded_file = st.file_uploader(
-    "Choose a CSV file",
-    type=["csv"]
-)
-
+uploaded_file = st.file_uploader("Choose a CSV file", type=["csv"])
 
 if uploaded_file is not None:
     st.success(f"Selected file: **{uploaded_file.name}**")
@@ -27,33 +17,23 @@ if uploaded_file is not None:
     if st.button("Analyze CSV 🚀"):
         with st.spinner("Uploading and analyzing..."):
             try:
-                files = {
-                    "file": (uploaded_file.name, uploaded_file.getvalue(), "text/csv")
-                }
-
+                files = {"file": (uploaded_file.name, uploaded_file.getvalue(), "text/csv")}
                 response = requests.post(f"{API_URL}/upload-csv", files=files)
 
                 if response.status_code == 200:
                     data = response.json()
                     st.success("Analysis complete!")
-
                     st.subheader("📁 File")
                     st.write(data["filename"])
-
                     st.subheader("📈 Report")
                     st.json(data["report"])
                     st.subheader("📥 Export Report")
-                    export_response = requests.get(f"{API_URL}/export")
-                    if export_response.status_code == 200:
-                        st.download_button(
-                            label="Download JSON Report",
-                            data=export_response.content,
-                            file_name="report.json",
-                            mime="application/json"
-                            )
-                    else:
-                        st.error("Could not fetch export.")
-
+                    st.download_button(
+                        label="Download JSON Report",
+                        data=json.dumps(data["report"], indent=2),
+                        file_name="report.json",
+                        mime="application/json"
+                    )
                 else:
                     st.error("Server returned an error")
                     st.json(response.json())
