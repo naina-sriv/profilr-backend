@@ -43,7 +43,7 @@ if uploaded_file is not None:
                     st.subheader("📈 Report")
                     st.json(data["report"])
                     st.subheader("📥 Export Report")
-                    export_response = requests.get("http://localhost:8000/export/")
+                    export_response = requests.get("https://profilr-backend-production.up.railway.app/export/")
                     if export_response.status_code == 200:
                         st.download_button(
                             label="Download JSON Report",
