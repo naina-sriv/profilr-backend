@@ -104,3 +104,5 @@ python -m streamlit run stream_lit.py
 - Authentication and file size limits
 - Dockerized deployment
 
+## Demo:
+![alt text](Animation.gif)

@@ -11,8 +11,8 @@ from datetime import datetime
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import traceback
-from app.utils import read_csv_safely, analyze_csv
-from app.config import setup_cors
+from .utils import read_csv_safely, analyze_csv
+from .config import setup_cors
 load_dotenv()
 Active_report = None
 app = FastAPI(
