@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 
 
-API_URL = "http://localhost:8000/upload-csv/"  # change if deployed elsewhere
+API_URL = "https://profilr.streamlit.app/" 
 
 st.set_page_config(
     page_title="CSV Profiler",
