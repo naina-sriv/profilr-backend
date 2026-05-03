@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 import json
 
-API_URL = "https://profilr-backend-production.up.railway.app"
+API_URL = "profilr-backend-teal.vercel.app"
 
 st.set_page_config(page_title="CSV Profiler", page_icon="📊", layout="centered")
 st.title("CSV Profiler")
