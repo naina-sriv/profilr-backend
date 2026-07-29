@@ -42,13 +42,21 @@ if uploaded_file is not None:
                     c2.metric("Categorical", report.get("column_summary", {}).get("categorical", 0))
                     c3.metric("Boolean", report.get("column_summary", {}).get("boolean", 0))
                     
-                    st.write("Data Quality Issues")
+                    st.write("Column Insights & Quality")
                     issues = report.get("data_quality_issues", [])
                     if issues:
                         for issue in issues:
                             st.warning(issue)
                     else:
                         st.info("No major issues found.")
+                        
+                    const_cols = report.get("constant_columns", [])
+                    if const_cols:
+                        st.info(f"Constant Columns (single value): {', '.join(const_cols)}")
+                    
+                    empty_cols = report.get("empty_columns", [])
+                    if empty_cols:
+                        st.info(f"Empty Columns (all missing): {', '.join(empty_cols)}")
                         
                     st.write("Column Details")
                     col_details = []
@@ -62,10 +70,17 @@ if uploaded_file is not None:
                             detail.update(report["summary"][col])
                         if "outliers" in report and col in report["outliers"]:
                             detail["Outliers"] = report["outliers"][col]
+                        if "distribution" in report and col in report["distribution"]:
+                            detail["Skewness"] = report["distribution"][col].get("skew")
+                            detail["Kurtosis"] = report["distribution"][col].get("kurtosis")
                         col_details.append(detail)
                         
                     if col_details:
                         st.dataframe(pd.DataFrame(col_details))
+                        
+                    if report.get("correlation"):
+                        st.write("Correlation Matrix")
+                        st.dataframe(pd.DataFrame(report["correlation"]))
                     
                     st.write("Duplicates")
                     d1, d2 = st.columns(2)
