@@ -9,15 +9,13 @@ from supabase import create_client, Client
 API_URL = "https://profilr-backend-teal.vercel.app"
 
 # Setup Supabase client
-@st.cache_resource
-def init_supabase():
-    url = os.environ.get("SUPABASE_URL") or (st.secrets.get("SUPABASE_URL") if hasattr(st, "secrets") else None)
-    key = os.environ.get("SUPABASE_KEY") or (st.secrets.get("SUPABASE_KEY") if hasattr(st, "secrets") else None)
-    if url and key:
+def get_supabase_client():
+    try:
+        url = os.environ.get("SUPABASE_URL") or st.secrets["SUPABASE_URL"]
+        key = os.environ.get("SUPABASE_KEY") or st.secrets["SUPABASE_KEY"]
         return create_client(url, key)
-    return None
-
-supabase: Client = init_supabase()
+    except Exception:
+        return None
 
 st.set_page_config(page_title="CSV Profiler", layout="centered")
 st.title("CSV Profiler")
@@ -39,6 +37,7 @@ if uploaded_file is not None:
     if st.button("Analyze CSV"):
         with st.spinner("Uploading and analyzing..."):
             try:
+                supabase = get_supabase_client()
                 if not supabase:
                     st.error("Supabase credentials not configured. Please set SUPABASE_URL and SUPABASE_KEY.")
                     st.stop()
