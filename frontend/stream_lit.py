@@ -14,6 +14,14 @@ uploaded_file = st.file_uploader("Choose a CSV file", type=["csv"])
 if uploaded_file is not None:
     st.success(f"Selected file: **{uploaded_file.name}**")
 
+    try:
+        df_preview = pd.read_csv(uploaded_file, nrows=5)
+        st.subheader("Data Preview")
+        st.dataframe(df_preview)
+        uploaded_file.seek(0)
+    except Exception as e:
+        st.warning(f"Could not load data preview: {e}")
+
     if st.button("Analyze CSV"):
         with st.spinner("Uploading and analyzing..."):
             try:
