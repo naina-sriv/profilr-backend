@@ -61,6 +61,12 @@ if uploaded_file is not None:
                 payload = {"file_url": public_url, "filename": uploaded_file.name}
                 response = requests.post(f"{API_URL}/analyze-url/", json=payload)
 
+                # Clean up the temporary file from Supabase bucket
+                try:
+                    supabase.storage.from_(bucket_name).remove([file_path])
+                except Exception as e:
+                    st.warning(f"Could not clean up temporary file from Supabase: {e}")
+
                 if response.status_code == 200:
                     data = response.json()
                     st.success("Analysis complete!")
