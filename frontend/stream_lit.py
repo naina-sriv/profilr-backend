@@ -103,8 +103,11 @@ if uploaded_file is not None:
                         mime="application/json"
                     )
                 else:
-                    st.error("Server returned an error")
-                    st.json(response.json())
+                    st.error(f"Server returned an error (Status {response.status_code})")
+                    try:
+                        st.json(response.json())
+                    except ValueError:
+                        st.text(response.text)
 
             except Exception as e:
                 st.error("Could not connect to the API")
