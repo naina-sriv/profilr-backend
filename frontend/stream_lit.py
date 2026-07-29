@@ -12,6 +12,11 @@ st.write("Upload a CSV file and get instant profiling insights.")
 uploaded_file = st.file_uploader("Choose a CSV file", type=["csv"])
 
 if uploaded_file is not None:
+    MAX_FILE_SIZE = 4.5 * 1024 * 1024  # 4.5 MB Vercel limit
+    if uploaded_file.size > MAX_FILE_SIZE:
+        st.error(f"File is too large ({uploaded_file.size / (1024*1024):.1f} MB). The backend server only accepts files up to 4.5 MB due to serverless payload limits.")
+        st.stop()
+        
     st.success(f"Selected file: **{uploaded_file.name}**")
 
     try:
