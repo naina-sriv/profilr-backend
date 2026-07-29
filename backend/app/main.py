@@ -11,6 +11,7 @@ from datetime import datetime
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import traceback
+import httpx
 from .utils import read_csv_safely, analyze_csv
 from .config import setup_cors
 load_dotenv()
@@ -56,6 +57,45 @@ async def upload_csv(file: UploadFile = File(...)):
     except Exception as e:
         tb = traceback.format_exc()
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}\nTraceback:\n{tb}")
+
+
+class FileUrlRequest(BaseModel):
+    file_url: str
+    filename: str
+
+@app.post("/analyze-url/")
+async def analyze_url(req: FileUrlRequest):
+    global Active_report
+    if not req.filename.endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Only CSV files are allowed.")
+
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(req.file_url)
+            resp.raise_for_status()
+            contents = resp.content
+
+        try:
+            df = pd.read_csv(io.BytesIO(contents), encoding_errors="replace")
+        except Exception:
+            df = pd.read_csv(io.BytesIO(contents), encoding="latin1", errors="replace")
+
+        if df.empty:
+            raise HTTPException(status_code=400, detail="Downloaded CSV is empty.")
+
+        df = df.replace({pd.NA: None, float("nan"): None})
+
+        report = analyze_csv(df)
+        Active_report = report
+
+        return {"filename": req.filename, "report": report}
+
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=400, detail=f"Failed to download file from URL: HTTP {e.response.status_code}")
+    except Exception as e:
+        tb = traceback.format_exc()
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}\nTraceback:\n{tb}")
+
 
 
 @app.get("/export/")

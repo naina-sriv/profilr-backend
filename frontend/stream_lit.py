@@ -2,8 +2,22 @@ import streamlit as st
 import requests
 import pandas as pd
 import json
+import os
+import uuid
+from supabase import create_client, Client
 
 API_URL = "https://profilr-backend-teal.vercel.app"
+
+# Setup Supabase client
+@st.cache_resource
+def init_supabase():
+    url = os.environ.get("SUPABASE_URL") or (st.secrets.get("SUPABASE_URL") if hasattr(st, "secrets") else None)
+    key = os.environ.get("SUPABASE_KEY") or (st.secrets.get("SUPABASE_KEY") if hasattr(st, "secrets") else None)
+    if url and key:
+        return create_client(url, key)
+    return None
+
+supabase: Client = init_supabase()
 
 st.set_page_config(page_title="CSV Profiler", layout="centered")
 st.title("CSV Profiler")
@@ -12,11 +26,6 @@ st.write("Upload a CSV file and get instant profiling insights.")
 uploaded_file = st.file_uploader("Choose a CSV file", type=["csv"])
 
 if uploaded_file is not None:
-    MAX_FILE_SIZE = 4.5 * 1024 * 1024  # 4.5 MB Vercel limit
-    if uploaded_file.size > MAX_FILE_SIZE:
-        st.error(f"File is too large ({uploaded_file.size / (1024*1024):.1f} MB). The backend server only accepts files up to 4.5 MB due to serverless payload limits.")
-        st.stop()
-        
     st.success(f"Selected file: **{uploaded_file.name}**")
 
     try:
@@ -30,8 +39,27 @@ if uploaded_file is not None:
     if st.button("Analyze CSV"):
         with st.spinner("Uploading and analyzing..."):
             try:
-                files = {"file": (uploaded_file.name, uploaded_file.getvalue(), "text/csv")}
-                response = requests.post(f"{API_URL}/upload-csv/", files=files)
+                if not supabase:
+                    st.error("Supabase credentials not configured. Please set SUPABASE_URL and SUPABASE_KEY.")
+                    st.stop()
+                    
+                bucket_name = "csv-uploads"
+                file_ext = uploaded_file.name.split('.')[-1]
+                file_path = f"{uuid.uuid4()}.{file_ext}"
+                
+                # Upload to Supabase Storage
+                supabase.storage.from_(bucket_name).upload(
+                    file_path,
+                    uploaded_file.getvalue(),
+                    {"content-type": "text/csv"}
+                )
+                
+                # Get public URL
+                public_url = supabase.storage.from_(bucket_name).get_public_url(file_path)
+                
+                # Call backend with URL
+                payload = {"file_url": public_url, "filename": uploaded_file.name}
+                response = requests.post(f"{API_URL}/analyze-url/", json=payload)
 
                 if response.status_code == 200:
                     data = response.json()
